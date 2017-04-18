@@ -10,7 +10,7 @@ SLACK_ROOM_NAME=ENV.fetch('SLACK_ROOM_NAME')
 
 client = Mastodon::REST::Client.new(base_url: MASTODON_BASE_URL, baarer_token: MASTODON_BAARER_TOKEN)
 
-while true
+loop do
   begin
     recent_id = 0
     if File.exists?(RECENT_ID_FILE)
