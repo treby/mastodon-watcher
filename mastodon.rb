@@ -11,6 +11,7 @@ SLACK_ROOM_NAME=ENV.fetch('SLACK_ROOM_NAME')
 client = Mastodon::REST::Client.new(base_url: MASTODON_BASE_URL, baarer_token: MASTODON_BAARER_TOKEN)
 
 loop do
+  retry_count = 0
   begin
     recent_id = 0
     if File.exists?(RECENT_ID_FILE)
@@ -28,6 +29,12 @@ loop do
     open(RECENT_ID_FILE, 'w') { |f| f.puts max_id }
     sleep FETCH_INTERVAL
   rescue StandardError => e
+    if retry_count < 3
+      sleep 5
+      retry_count += 1
+      retry
+    end
+
     `curl -X POST --data-urlencode 'payload={"channel": "#{SLACK_ROOM_NAME}", "username": "mastodon-bot", "text": "Hi, treby. I am down. Please check.\n\n#{e.inspect}", "icon_emoji": ":warning:"}' #{SLACK_WEBHOOK_URL}`
     raise
   end
