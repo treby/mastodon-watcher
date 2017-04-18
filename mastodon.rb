@@ -6,6 +6,7 @@ FETCH_INTERVAL=ENV.fetch('FETCH_INTERVAL', '30').to_i
 MASTODON_BASE_URL=ENV.fetch('MASTODON_BASE_URL')
 MASTODON_BAARER_TOKEN=ENV.fetch('MASTODON_BAARER_TOKEN')
 SLACK_WEBHOOK_URL=ENV.fetch('SLACK_WEBHOOK_URL')
+SLACK_ROOM_NAME=ENV.fetch('SLACK_ROOM_NAME')
 
 client = Mastodon::REST::Client.new(base_url: MASTODON_BASE_URL, baarer_token: MASTODON_BAARER_TOKEN)
 
@@ -20,7 +21,7 @@ while true
     next unless recent_id < status.id
     max_id = status.id if max_id < status.id
 
-    `curl -X POST --data-urlencode 'payload={"channel": "#imastodon-net", "username": "#{status.account.username}", "text": "> #{Nokogiri::HTML(status.content).text}\n\n#{status.url}", "icon_url": "#{status.account.avatar}"}' #{SLACK_WEBHOOK_URL}`
+    `curl -X POST --data-urlencode 'payload={"channel": "#{SLACK_ROOM_NAME}", "username": "#{status.account.username}", "text": "> #{Nokogiri::HTML(status.content).text}\n\n#{status.url}", "icon_url": "#{status.account.avatar}"}' #{SLACK_WEBHOOK_URL}`
   end
 
   open(RECENT_ID_FILE, 'w') { |f| f.puts max_id }
